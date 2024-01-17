@@ -1,0 +1,2 @@
+_extends: .github
+tag-template: AIErrorAnalyzer-$NEXT_MINOR_VERSION

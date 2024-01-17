@@ -1,0 +1,137 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:st="jelly:stapler">
+    <j:set var="analyzerResponse" value="${it.getAnalyzerResponse()}" />
+    <j:set var="isResponseRead" value="${it.isResponseRead}" />
+
+    <style type="text/css">
+        .response-block {
+            display: flex;
+        }
+
+        .response-text {
+            background-color: #f5f5f5;
+            border: 1px solid #ccc;
+            padding: 10px;
+            font-family: monospace;
+            max-width: 900;
+            min-width: 900;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: white;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+
+        .chat-input {
+            display: flex;
+            justify-content: center;
+        }
+
+        .chat-input input[type="text"] {
+            flex-grow: 1;
+            padding: 5px;
+            border: 1px solid #ddd;
+            margin-right: 30px;
+        }
+
+        .chat-input button {
+            padding: 5px 10px;
+        }        
+    </style>    
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const text = `${analyzerResponse}`;
+            const container = document.getElementById("typewriter");
+
+            if (!${isResponseRead}) {
+                let index = 0;
+                function typeWriterEffect() {
+                    if (index != text.length + 1) {
+                        container.innerHTML += text.charAt(index);
+                        index++;
+                        setTimeout(typeWriterEffect, 20); // Adjust for speed
+                    } else {
+                        ${it.readResponse()}
+                    }
+                }
+
+                if (container) {
+                    typeWriterEffect();
+                }
+            } else {
+                if (container) {
+                    container.innerHTML = text;
+                }    
+            }
+
+            document.getElementById("sendRequestButton").addEventListener("click", sendMessage);
+        });
+
+        function sendMessage() {
+            const input = document.getElementById("chatInput");
+            const message = input.value;
+            input.value = "";
+
+            const chatMessages = document.getElementById("chatMessages");
+            const msgElement = document.createElement("div");
+            msgElement.textContent = message;
+            chatMessages.appendChild(msgElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    </script>
+    
+    <l:layout title="AI assistant">
+        <l:side-panel> 
+            <st:include page="sidepanel.jelly" it="${it.run}" optional="true" /> 
+        </l:side-panel>
+        <l:main-panel>
+            <h1>
+                <l:icon src="symbol-jenkins" tooltip="Howdy" class="icon-xlg" />
+                AI assistant
+            </h1>
+            <j:if test="${it.run.getResult().isCompleteBuild()}">
+                <j:if test="${it.run.result == 'FAILURE'}">
+                    <div class="chat-container">
+                        <div id="chatMessages" class="chat-messages">
+                            <div class="response-block">
+                                <l:icon src="symbol-jenkins" tooltip="Howdy" class="icon-lg" />
+                                <pre class="response-text">
+                                    <code>
+                                        <p id="typewriter"/>
+                                    </code>
+                                </pre>
+                            </div>
+                        </div>
+                        <div class="chat-input">
+                        <!--
+                            <input type="text" id="chatInput" />                            
+                            <button id="sendRequestButton">Send</button>
+                        -->    
+                        </div>
+                    </div>
+                </j:if>
+                <j:if test="${it.run.result == 'SUCCESS'}"> 
+                    <p class="jenkins-leading-paragraph">
+                        Build finished succesfully. Nothing to analyze.
+                    </p>
+                </j:if>                
+            </j:if>    
+            <j:if test="!(${it.run.getResult().isCompleteBuild()})">
+                <p class="jenkins-leading-paragraph">
+                    Pipiline is still working. Please wait until the result is ready.
+                </p>                
+                <l:progressAnimation />
+            </j:if>
+        </l:main-panel>
+    </l:layout>
+</j:jelly>
