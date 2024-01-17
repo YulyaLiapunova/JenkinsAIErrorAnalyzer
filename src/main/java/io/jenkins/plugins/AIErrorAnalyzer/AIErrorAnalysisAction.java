@@ -17,11 +17,11 @@ public class AIErrorAnalysisAction implements RunAction2 {
 
     private static Logger logger = Logger.getLogger(AIErrorAnalysisAction.class.getName());
 
-    private AIIntegration aiIntegration;
+    AIIntegration aiIntegration;
 
-    private List<String> errorTemplates;
+    List<String> errorTemplates;
 
-    private ArrayList<String> analyzerResponses;
+    ArrayList<String> analyzerResponses;
 
     public boolean isResponseRead = false;
 
@@ -74,7 +74,7 @@ public class AIErrorAnalysisAction implements RunAction2 {
     public void requestAIAnalyze() throws Exception {
         String errorDetails = this.readLog();
 
-        if (errorDetails.isBlank()) {
+        if (errorDetails == "") {
             analyzerResponses.add("Build finished succesfully. Nothing to analyze");
         } else {
             System.out.println("Requesting from AI Analyzer...");
